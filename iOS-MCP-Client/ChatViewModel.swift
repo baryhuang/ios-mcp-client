@@ -8,7 +8,7 @@ class ChatViewModel: ObservableObject {
     @Published var isRecording: Bool = false
     @Published var isProcessing: Bool = false
     
-    private let openAIAPIKey = "Replace with your actual API key" // 
+    private let openAIAPIKey = Config.openAIAPIKey
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
@@ -147,6 +147,12 @@ class ChatViewModel: ObservableObject {
     
     // Call the OpenAI API
     private func sendToChatGPT(message: String, completion: @escaping (Result<String, Error>) -> Void) {
+        // Check if API key is available
+        guard !openAIAPIKey.isEmpty else {
+            completion(.failure(NSError(domain: "Missing API Key", code: 401, userInfo: [NSLocalizedDescriptionKey: "OpenAI API key is not configured. Please check README.md for setup instructions."])))
+            return
+        }
+        
         // Define the API endpoint
         let url = URL(string: "https://api.openai.com/v1/chat/completions")!
         var request = URLRequest(url: url)
